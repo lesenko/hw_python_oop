@@ -5,7 +5,7 @@ class Calculator:
     def __init__(self, limit):
         self.limit = limit
         self.records = []
-   
+
     def add_record(self, record):
         self.records.append(record)
 
@@ -47,7 +47,7 @@ class CaloriesCalculator(Calculator):
             return 'Хватит есть!'
         else:
             return ('Сегодня можно съесть что-нибудь ещё, '
-            f'но с общей калорийностью не более {today_calories} кКал')
+                    f'но с общей калорийностью не более {today_calories} кКал')
 
 
 class CashCalculator(Calculator):
@@ -71,19 +71,3 @@ class CashCalculator(Calculator):
         else:
             today_cash_abs = abs(today_cash)
             return f'Денег нет, держись: твой долг - {today_cash_abs} {name}'
-
-
-cash_calculator = CaloriesCalculator(1000)
-
-# дата в параметрах не указана,
-# так что по умолчанию к записи
-# должна автоматически добавиться сегодняшняя дата
-cash_calculator.add_record(Record(amount=145, comment='кофе'))
-# и к этой записи тоже дата должна добавиться автоматически
-cash_calculator.add_record(Record(amount=300, comment='Серёге за обед'))
-# а тут пользователь указал дату, сохраняем её
-cash_calculator.add_record(Record(amount=3000,
-                                  comment='бар в Танин др',
-                                  date='08.11.2019'))
-
-print(cash_calculator.get_calories_remained())
