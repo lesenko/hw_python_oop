@@ -11,18 +11,16 @@ class Calculator:
 
     def get_today_stats(self):
         today = dt.date.today()
-        records = self.records
-        list = (record.amount for record in records if record.date == today)
-        return sum(list)
+        today_amount = (record.amount for record in self.records
+                        if record.date == today)
+        return sum(today_amount)
 
     def get_week_stats(self):
         today_date = dt.datetime.now().date()
         week_ago = today_date - dt.timedelta(days=7)
-        sum_week = 0
-        for record in self.records:
-            if week_ago <= record.date <= today_date:
-                sum_week += record.amount
-        return sum_week
+        week_amount = (record.amount for record in self.records
+                       if week_ago <= record.date <= today_date)
+        return sum(week_amount)
 
     def get_today_balance(self):
         today_balance = self.limit - self.get_today_stats()
@@ -41,12 +39,13 @@ class Record:
 
 class CaloriesCalculator(Calculator):
     def get_calories_remained(self):
-        if self.get_today_balance() <= 0:
+        balance_calories = self.get_today_balance()
+        if balance_calories <= 0:
             return 'Хватит есть!'
         else:
             return ('Сегодня можно съесть что-нибудь ещё, '
                     'но с общей калорийностью не более '
-                    f'{self.get_today_balance()} кКал')
+                    f'{balance_calories} кКал')
 
 
 class CashCalculator(Calculator):
@@ -58,13 +57,14 @@ class CashCalculator(Calculator):
         currencies = {'usd': ('USD', CashCalculator.USD_RATE),
                       'eur': ('Euro', CashCalculator.EURO_RATE),
                       'rub': ('руб', CashCalculator.RUB_RATE)}
-        if self.get_today_balance() == 0:
+        balance_cash = self.get_today_balance()
+        if balance_cash == 0:
             return 'Денег нет, держись'
         elif currency not in currencies:
             return 'Такой валюты нет. Укажите usd, eur или rub.'
         else:
             name, rate = currencies[currency]
-            today_cash = round((self.get_today_balance()) / rate, 2)
+            today_cash = round((balance_cash) / rate, 2)
             if today_cash > 0:
                 return f'На сегодня осталось {today_cash} {name}'
             else:
