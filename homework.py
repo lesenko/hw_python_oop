@@ -45,7 +45,8 @@ class CaloriesCalculator(Calculator):
             return 'Хватит есть!'
         else:
             return ('Сегодня можно съесть что-нибудь ещё, '
-                    f'но с общей калорийностью не более {self.get_today_balance()} кКал')
+                    'но с общей калорийностью не более '
+                    f'{self.get_today_balance()} кКал')
 
 
 class CashCalculator(Calculator):
@@ -60,7 +61,7 @@ class CashCalculator(Calculator):
         if self.get_today_balance() == 0:
             return 'Денег нет, держись'
         elif currency not in currencies:
-            return 'В калькуляторе нет такой валюты. Укажите usd, eur или rub.'
+            return 'Такой валюты нет. Укажите usd, eur или rub.'
         else:
             name, rate = currencies[currency]
             today_cash = round((self.get_today_balance()) / rate, 2)
@@ -68,22 +69,5 @@ class CashCalculator(Calculator):
                 return f'На сегодня осталось {today_cash} {name}'
             else:
                 today_cash_abs = abs(today_cash)
-                return f'Денег нет, держись: твой долг - {today_cash_abs} {name}'
-
-
-cash_calculator = CashCalculator(1000)
-
-# дата в параметрах не указана,
-# так что по умолчанию к записи
-# должна автоматически добавиться сегодняшняя дата
-cash_calculator.add_record(Record(amount=145, comment='кофе'))
-# и к этой записи тоже дата должна добавиться автоматически
-cash_calculator.add_record(Record(amount=300, comment='Серёге за обед'))
-# а тут пользователь указал дату, сохраняем её
-cash_calculator.add_record(Record(amount=3000,
-                                  comment='бар в Танин др',
-                                  date='08.11.2019'))
-
-print(cash_calculator.get_today_cash_remained('rub'))
-# должно напечататься
-# На сегодня осталось 555 руб 
+                return ('Денег нет, держись: твой долг - '
+                        f'{today_cash_abs} {name}')
