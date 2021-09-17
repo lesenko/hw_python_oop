@@ -11,20 +11,22 @@ class Calculator:
 
     def get_today_stats(self):
         today = dt.date.today()
-        sum_today = 0
-        for record in self.records:
-            if record.date == today:
-                sum_today += record.amount
-        return sum_today
+        records = self.records
+        list = (record.amount for record in records if record.date == today)
+        return sum(list)
 
     def get_week_stats(self):
-        week_ago = dt.datetime.now().date() - dt.timedelta(days=7)
         today_date = dt.datetime.now().date()
+        week_ago = today_date - dt.timedelta(days=7)
         sum_week = 0
         for record in self.records:
-            if record.date >= week_ago and record.date <= today_date:
+            if week_ago <= record.date <= today_date:
                 sum_week += record.amount
         return sum_week
+
+    def get_today_balance(self):
+        today_balance = self.limit - self.get_today_stats()
+        return today_balance
 
 
 class Record:
@@ -38,16 +40,12 @@ class Record:
 
 
 class CaloriesCalculator(Calculator):
-    def __init__(self, limit):
-        super().__init__(limit)
-
     def get_calories_remained(self):
-        today_calories = self.limit - self.get_today_stats()
-        if today_calories <= 0:
+        if self.get_today_balance() <= 0:
             return 'Хватит есть!'
         else:
             return ('Сегодня можно съесть что-нибудь ещё, '
-                    f'но с общей калорийностью не более {today_calories} кКал')
+                    f'но с общей калорийностью не более {self.get_today_balance()} кКал')
 
 
 class CashCalculator(Calculator):
@@ -55,19 +53,37 @@ class CashCalculator(Calculator):
     EURO_RATE = 86.13
     RUB_RATE = 1
 
-    def __init__(self, limit):
-        super().__init__(limit)
-
     def get_today_cash_remained(self, currency='rub') -> None:
         currencies = {'usd': ('USD', CashCalculator.USD_RATE),
                       'eur': ('Euro', CashCalculator.EURO_RATE),
                       'rub': ('руб', CashCalculator.RUB_RATE)}
-        name, rate = currencies[currency]
-        today_cash = round((self.limit - self.get_today_stats()) / rate, 2)
-        if today_cash == 0:
+        if self.get_today_balance() == 0:
             return 'Денег нет, держись'
-        elif today_cash > 0:
-            return f'На сегодня осталось {today_cash} {name}'
+        elif currency not in currencies:
+            return 'В калькуляторе нет такой валюты. Укажите usd, eur или rub.'
         else:
-            today_cash_abs = abs(today_cash)
-            return f'Денег нет, держись: твой долг - {today_cash_abs} {name}'
+            name, rate = currencies[currency]
+            today_cash = round((self.get_today_balance()) / rate, 2)
+            if today_cash > 0:
+                return f'На сегодня осталось {today_cash} {name}'
+            else:
+                today_cash_abs = abs(today_cash)
+                return f'Денег нет, держись: твой долг - {today_cash_abs} {name}'
+
+
+cash_calculator = CashCalculator(1000)
+
+# дата в параметрах не указана,
+# так что по умолчанию к записи
+# должна автоматически добавиться сегодняшняя дата
+cash_calculator.add_record(Record(amount=145, comment='кофе'))
+# и к этой записи тоже дата должна добавиться автоматически
+cash_calculator.add_record(Record(amount=300, comment='Серёге за обед'))
+# а тут пользователь указал дату, сохраняем её
+cash_calculator.add_record(Record(amount=3000,
+                                  comment='бар в Танин др',
+                                  date='08.11.2019'))
+
+print(cash_calculator.get_today_cash_remained('rub'))
+# должно напечататься
+# На сегодня осталось 555 руб 
